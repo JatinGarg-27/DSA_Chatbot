@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DSA Instructor — ask across every data structure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2321201c'/%3E%3Cpath d='M9 22V10h4.2c3.6 0 5.8 2.3 5.8 6s-2.2 6-5.8 6H9Zm3-2.6h1c1.9 0 3-1.2 3-3.4s-1.1-3.4-3-3.4h-1v6.8Z' fill='%23fdfdfc'/%3E%3C/svg%3E"
+  />
+</head>
+<body>
+  <div class="app">
+    <!-- ───────────────────────── sidebar ───────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__top">
+        <div class="brand">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="26" height="26">
+              <rect width="32" height="32" rx="8" fill="currentColor" />
+              <path d="M9 22V10h4.2c3.6 0 5.8 2.3 5.8 6s-2.2 6-5.8 6H9Zm3-2.6h1c1.9 0 3-1.2 3-3.4s-1.1-3.4-3-3.4h-1v6.8Z" fill="var(--bg)" />
+            </svg>
+          </span>
+          <span class="brand__name">DSA Instructor</span>
+        </div>
+
+        <button class="btn btn--block" id="newChat" type="button">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+            <path d="M8 3.5v9M3.5 8h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+          New chat
+        </button>
+      </div>
+
+      <nav class="history" aria-label="Recent topics">
+        <p class="history__label">Practice topics</p>
+        <ul id="topicList">
+          <li><button type="button" class="topic">Two Sum &amp; hashing</button></li>
+          <li><button type="button" class="topic">Reverse a linked list</button></li>
+          <li><button type="button" class="topic">Binary search variants</button></li>
+          <li><button type="button" class="topic">Quicksort vs Mergesort</button></li>
+          <li><button type="button" class="topic">BFS vs DFS on a graph</button></li>
+          <li><button type="button" class="topic">Dynamic programming basics</button></li>
+          <li><button type="button" class="topic">Sliding window pattern</button></li>
+          <li><button type="button" class="topic">Big-O of common ops</button></li>
+        </ul>
+      </nav>
+
+      <div class="user">
+        <span class="user__avatar">JD</span>
+        <span class="user__meta">
+          <span class="user__name">Jane Doe</span>
+          <span class="user__mail">jane@acme.com</span>
+        </span>
+      </div>
+    </aside>
+
+    <!-- ───────────────────────── main ───────────────────────── -->
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn topbar__menu" id="menuToggle" type="button" aria-label="Toggle sidebar">
+          <svg viewBox="0 0 16 16" width="16" height="16"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+        <h1 class="topbar__title" id="chatTitle">New session</h1>
+        <span class="topbar__badge">Gemini</span>
+      </header>
+
+      <section class="thread" id="thread">
+        <!-- empty state -->
+        <div class="hero" id="hero">
+          <p class="hero__eyebrow">DSA Instructor</p>
+          <h2 class="hero__title">One place to ask,<br />across every data structure.</h2>
+          <p class="hero__sub">
+            Ask about arrays, trees, graphs, recursion, or complexity in plain
+            language. You get a clear explanation, the reasoning, and short code
+            you can check — nothing off-topic.
+          </p>
+          <div class="suggest" id="suggest">
+            <button type="button" class="chip">Explain time complexity of merge sort</button>
+            <button type="button" class="chip">How does a hash map handle collisions?</button>
+            <button type="button" class="chip">Detect a cycle in a linked list</button>
+            <button type="button" class="chip">When should I use a heap?</button>
+          </div>
+        </div>
+        <!-- messages injected here -->
+      </section>
+
+      <footer class="composer">
+        <form class="composer__box" id="chatForm">
+          <textarea
+            id="input"
+            class="composer__input"
+            rows="1"
+            placeholder="Ask a Data Structures & Algorithms question…"
+            autocomplete="off"
+          ></textarea>
+          <button class="btn btn--send" id="sendBtn" type="submit" aria-label="Send">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+              <path d="M2.5 8h10M8 3.5 12.5 8 8 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </form>
+        <p class="composer__hint">DSA Instructor only answers Data Structures &amp; Algorithms questions. Replies can be imperfect — verify the code.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
