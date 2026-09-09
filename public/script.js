@@ -204,22 +204,53 @@ async function send(text) {
       body: JSON.stringify({ message: text, history: history.slice(0, -1) }),
     });
 
-    const raw = await res.text();
-    let data = {};
-    try {
-      data = raw ? JSON.parse(raw) : {};
-    } catch {
-      data = { error: "Server did not return JSON.", detail: raw.slice(0, 200) };
+    const ctype = res.headers.get("content-type") || "";
+
+    // error responses come back as JSON
+    if (!res.ok || ctype.includes("application/json")) {
+      const raw = await res.text();
+      let data = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        data = { error: "Server did not return JSON.", detail: raw.slice(0, 200) };
+      }
+      clearTyping();
+      showError(
+        data.error || "Request failed (" + res.status + ").",
+        data.detail
+      );
+      return;
     }
 
-    clearTyping();
+    // success: stream plain text into a live-updating bubble
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let acc = "";
+    let bodyEl = null;
 
-    if (!res.ok || data.error) {
-      showError(data.error || "Request failed (" + res.status + ").", data.detail);
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const piece = decoder.decode(value, { stream: true });
+      if (!piece) continue;
+      if (!bodyEl) {
+        clearTyping();
+        bodyEl = addMessage("bot", "").querySelector(".msg__body");
+      }
+      acc += piece;
+      bodyEl.innerHTML = renderMarkdown(acc);
+      scrollDown();
+    }
+    acc += decoder.decode();
+
+    if (!bodyEl) {
+      clearTyping();
+      addMessage("bot", "(empty response)");
     } else {
-      addMessage("bot", data.reply || "(empty response)");
-      history.push({ role: "assistant", text: data.reply || "" });
+      bodyEl.innerHTML = renderMarkdown(acc);
     }
+    history.push({ role: "assistant", text: acc });
   } catch (err) {
     clearTyping();
     showError("Could not reach the server.", String(err));
