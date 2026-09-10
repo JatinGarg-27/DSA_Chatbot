@@ -37,6 +37,16 @@ function retryDelayMs(err, fallback) {
   return fallback;
 }
 
+// Bad / missing / malformed API key -> retrying won't help.
+function isAuthError(err) {
+  const s = String(err?.message || err).toLowerCase();
+  return (
+    /api[_ ]key not valid|api_key_invalid|invalid api key|permission_denied|unauthenticated|\b401\b|\b403\b/.test(
+      s
+    )
+  );
+}
+
 // Daily free-tier quota is exhausted -> retrying today is pointless.
 function isDailyQuota(err) {
   const s = String(err?.message || err).toLowerCase();
@@ -151,14 +161,15 @@ export default async function handler(req, res) {
         return;
       }
 
-      const daily = isDailyQuota(err);
-      const transient = !daily && isTransient(err);
+      const auth = isAuthError(err);
+      const daily = !auth && isDailyQuota(err);
+      const transient = !auth && !daily && isTransient(err);
       console.error(
-        `Gemini error (attempt ${attempt}/${MAX_ATTEMPTS}, daily=${daily}, transient=${transient}):`,
+        `Gemini error (attempt ${attempt}/${MAX_ATTEMPTS}, auth=${auth}, daily=${daily}, transient=${transient}):`,
         err?.message || err
       );
 
-      if (daily) break; // a per-day quota won't clear within this request
+      if (auth || daily) break; // neither clears by retrying in this request
       if (transient && attempt < MAX_ATTEMPTS) {
         await sleep(retryDelayMs(err, 800 * attempt));
         continue;
@@ -167,11 +178,13 @@ export default async function handler(req, res) {
     }
   }
 
+  const auth = isAuthError(lastErr);
   const daily = isDailyQuota(lastErr);
-  return res.status(daily ? 429 : 502).json({
-    error: daily
-      ? "The Gemini API key's free-tier daily limit is used up (about 20 requests/day). It resets around midnight US-Pacific. To lift it, enable billing on the key or use a paid key."
-      : "The model is busy right now. Please try again in a moment.",
-    detail: String(lastErr?.message || lastErr),
-  });
+  const status = auth ? 500 : daily ? 429 : 502;
+  const error = auth
+    ? "The GEMINI_API_KEY on the server is invalid. Re-check the value in Vercel -> Settings -> Environment Variables (no quotes, no trailing spaces or newline)."
+    : daily
+    ? "The Gemini API key's free-tier daily limit is used up (about 20 requests/day). It resets around midnight US-Pacific. To lift it, enable billing on the key or set GEMINI_MODEL to a -lite model."
+    : "The model is busy right now. Please try again in a moment.";
+  return res.status(status).json({ error, detail: String(lastErr?.message || lastErr) });
 }
